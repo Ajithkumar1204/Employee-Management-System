@@ -45,6 +45,7 @@ public class RefreshTokenService {
         // Delete any existing refresh token for this user (one active session at a time)
         refreshTokenRepository.findByUser(user)
                 .ifPresent(refreshTokenRepository::delete);
+				refreshTokenRepository.flush();
 
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
