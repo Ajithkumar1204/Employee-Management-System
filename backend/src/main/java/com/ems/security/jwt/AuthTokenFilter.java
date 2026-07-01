@@ -1,0 +1,83 @@
+package com.ems.security.jwt;
+
+import com.ems.security.service.UserDetailsServiceImpl;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+/**
+ * AuthTokenFilter runs once per request (extends OncePerRequestFilter).
+ * It intercepts the Authorization header, validates the JWT,
+ * and sets the authentication in the SecurityContext.
+ *
+ * Spring Security will then grant access based on the authenticated user's roles.
+ */
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class AuthTokenFilter extends OncePerRequestFilter {
+
+    private final JwtUtils jwtUtils;
+    private final UserDetailsServiceImpl userDetailsService;
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
+        try {
+            String jwt = parseJwtFromRequest(request);
+
+            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+                String email = jwtUtils.getEmailFromJwtToken(jwt);
+
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+                // Create authentication token with user details and roles
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+
+                authentication.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+
+                // Set authentication in security context so downstream can access it
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+        } catch (Exception e) {
+            log.error("Cannot set user authentication: {}", e.getMessage());
+        }
+
+        filterChain.doFilter(request, response);
+    }
+
+    /**
+     * Extracts the JWT from the Authorization header.
+     * Expected format: "Bearer <token>"
+     */
+    private String parseJwtFromRequest(HttpServletRequest request) {
+        String headerAuth = request.getHeader("Authorization");
+
+        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+            return headerAuth.substring(7);  // Remove "Bearer " prefix
+        }
+
+        return null;
+    }
+}
