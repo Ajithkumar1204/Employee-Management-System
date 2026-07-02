@@ -114,7 +114,7 @@ public class SecurityConfig {
 		
     CorsConfiguration configuration = new CorsConfiguration();
 
-    configuration.setAllowedOrigins(List.of(
+    configuration.setAllowedOriginPatterns(List.of(
         "http://localhost:5173",
         "https://employee-management-systemz.netlify.app"
     ));
@@ -124,6 +124,7 @@ public class SecurityConfig {
     ));
 
     configuration.setAllowedHeaders(List.of("*"));
+	configuration.setExposedHeaders(List.of("*"));
     configuration.setAllowCredentials(true);
 
     UrlBasedCorsConfigurationSource source =
