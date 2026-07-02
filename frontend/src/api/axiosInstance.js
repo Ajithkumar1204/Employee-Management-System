@@ -10,7 +10,7 @@ import axios from 'axios'
  *   then retries the original request. If refresh also fails, logs user out.
  */
 const axiosInstance = axios.create({
-  baseURL: 'https://employee-management-system-f4qd.onrender.com/api',
+  baseURL: 'https://employee-management-system-f4qd.onrender.com',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
