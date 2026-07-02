@@ -7,7 +7,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:8081',
+        target: 'https://employee-management-system-f4qd.onrender.com',
         changeOrigin: true,
       }
     }
