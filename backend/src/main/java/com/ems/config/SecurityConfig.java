@@ -1,5 +1,10 @@
 package com.ems.config;
 
+import java.util.List;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.config.Customizer;
 import com.ems.security.jwt.AuthEntryPointJwt;
 import com.ems.security.jwt.AuthTokenFilter;
 import com.ems.security.service.UserDetailsServiceImpl;
@@ -74,6 +79,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             // Disable CSRF - not needed for stateless JWT-based APIs
+			.cors(Customizer.withDefaults())
             .csrf(AbstractHttpConfigurer::disable)
 
             // Set custom 401 handler
@@ -98,5 +104,29 @@ public class SecurityConfig {
             .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-    }
+		}
+	
+	@Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+
+    configuration.setAllowedOrigins(List.of(
+        "http://localhost:5173",
+        "https://employee-management-systemz.netlify.app"
+    ));
+
+    configuration.setAllowedMethods(List.of(
+        "GET", "POST", "PUT", "DELETE", "OPTIONS"
+    ));
+
+    configuration.setAllowedHeaders(List.of("*"));
+    configuration.setAllowCredentials(true);
+
+    UrlBasedCorsConfigurationSource source =
+            new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+
+    return source;
+   }
+	
 }
