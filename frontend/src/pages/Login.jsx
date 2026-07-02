@@ -143,9 +143,7 @@ const Login = () => {
         </div>
 
         <div className="text-center mt-3 pt-3 border-top">
-         /* <small className="text-muted">
-            Default Admin: <code>admin@ems.com</code> / <code>Admin@123</code>
-          </small>*/
+         
         </div>
       </div>
     </div>
