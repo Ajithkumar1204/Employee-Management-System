@@ -92,6 +92,7 @@ public class SecurityConfig {
 
             // Define authorization rules
             .authorizeHttpRequests(auth -> auth
+			    .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
